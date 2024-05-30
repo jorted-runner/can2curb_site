@@ -80,17 +80,17 @@ def admin_only(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# @app.errorhandler(404)
-# def not_found(e):
-#     return render_template('404.html', e=e)
+@app.errorhandler(404)
+def not_found(e):
+    return render_template('404.html', e=e)
 
-# @app.errorhandler(403)
-# def not_found(e):
-#     return render_template('403.html', e=e)
+@app.errorhandler(403)
+def not_found(e):
+    return render_template('403.html', e=e)
 
-# @app.errorhandler(Exception)
-# def handle_exception(e):
-#     return render_template('error.html', e=e), 500
+@app.errorhandler(Exception)
+def handle_exception(e):
+    return render_template('error.html', e=e), 500
 
 @app.route('/')
 def home():
@@ -118,7 +118,7 @@ def register():
 
         if RETRIEVER.get_user(User, email, 'email'):
             flash("You've already signed up with that email, <a href='" + url_for('login') + "'>log in</a> instead!")
-            return redirect(url_for('login'))
+            return redirect(url_for('register'))
         
         new_user_password = generate_password_hash(password, method='pbkdf2:sha256', salt_length=8)
         
@@ -159,9 +159,27 @@ def register():
         return redirect(url_for('manage'))
     return render_template('register.html')
 
-@app.route('/login')
+@app.route('/login', methods=["GET", "POST"])
 def login():
-    return render_template('login.html')
+    if request.method == "POST":
+        email = VALIDATOR.clean_input(request.form.get('email'))
+        password = VALIDATOR.clean_input(request.form.get('password'))
+        user = User.query.filter(or_(User.email == email)).first()
+        if user:
+            if check_password_hash(user.password, password):
+                login_user(user)
+                if user.profile_type != 'employee' or user.email in app_config.ADMIN_EMAILS:
+                    return redirect(url_for('admin'))
+                return redirect(url_for('manage'))
+            else:
+                flash("Incorrect Password, try again!")
+                return render_template("login.html", current_user=current_user)
+        else:
+            flash("No user associated with that email, try <a href='" + url_for('register') + "'>registering</a>!")
+            return redirect(url_for('login'))
+    else:
+        return render_template("login.html", current_user=current_user)
+
 
 @login_required
 @app.route('/manage')
@@ -169,10 +187,16 @@ def manage():
     user = User.query.filter_by(id=current_user.id).first()
     return render_template('manage.html', user=user)
 
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('home'))
+
 @admin_only
 @app.route('/admin')
 def admin():
-    return render_template('admin.html')
+    all_users = User.query.all()
+    return render_template('admin.html', all_users=all_users, current_user=current_user)
 
 if __name__ == '__main__':
     app.run(debug=True)

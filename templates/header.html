@@ -1,12 +1,21 @@
 <header>
-    <h1 class="poetsen-one-regular logo-header"><a href="{{ url_for('home') }}">can2curb</a></h1>
-    <nav>
-        <a href="{{ url_for('register')}}">Register</a>
-        <a href="{{ url_for('login') }}">Login</a>
-    </nav>
-    {% if get_flashed_messages %}
-        {% for message in get_flashed_messages() %}
-            <h4 class="flashed_message">{{ message | safe }}</h4>
-        {% endfor %}
+    {% if current_user.is_authenticated %}
+        <h1 class="poetsen-one-regular logo-header"><a href="{{ url_for('manage') }}">can2curb</a></h1>
+    {% else %}
+        <h1 class="poetsen-one-regular logo-header"><a href="{{ url_for('home') }}">can2curb</a></h1>
     {% endif %}
+    <nav>
+        {% if current_user.is_authenticated %}
+            <a href="{{ url_for('logout') }}">Logout</a>
+        {% else %}
+            <a href="{{ url_for('register')}}">Register</a>
+            <a href="{{ url_for('login') }}">Login</a>
+        {% endif %}
+    </nav>
+    
 </header>
+{% if get_flashed_messages %}
+    {% for message in get_flashed_messages() %}
+        <h4 class="flashed_message">{{ message | safe }}</h4>
+    {% endfor %}
+{% endif %}

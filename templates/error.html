@@ -10,16 +10,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Poetsen+One&display=swap" rel="stylesheet">
 </head>
 <body>
-    {% include 'header.html' %}
-    
-    <main>
-        <h1>Admin Home</h1>
-        {% for user in all_users %}
-            <p>{{user.fname}}</p>
-            {% for address in user.addresses %}
-                {{address.street_address}}
-            {% endfor %}
-        {% endfor %}
-    </main>
+    {% include "header.html" %}
+<body>
+    <h1>Server Error</h1>
+    <p>{{ e }}</p>
+    <p>Please email the error code to chefscabinet.danny@gmail.com</p>
 </body>
 </html>
