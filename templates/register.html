@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Can2Curb</title>
+    <link href="/static/styles/base.css" type="text/css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poetsen+One&display=swap" rel="stylesheet">
+</head>
+<body>
+    {% include 'header.html' %}
+    
+    <main>
+        <form>
+            <fieldset>
+                <legend>Personal Information</legend>
+                <label for="first-name">First Name:</label>
+                <input type="text" id="first-name" name="first-name" required>
+                
+                <label for="last-name">Last Name:</label>
+                <input type="text" id="last-name" name="last-name" required>
+                
+                <label for="email">Email Address:</label>
+                <input type="email" id="email" name="email" required>
+                
+                <label for="phone">Phone Number:</label>
+                <input type="tel" id="phone" name="phone" required>
+
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+
+                <label for="password">Password Confirmation:</label>
+                <input type="password" id="password" name="password" required>
+            </fieldset>
+            
+            <fieldset>
+                <legend>Address Information</legend>
+                <label for="houseNum">House Number:</label>
+                <input type="text" id="houseNum" name="houseNum" required>
+                
+                <label for="street">Street:</label>
+                <input type="text" id="street" name="street" required>
+                
+                <label for="city">City:</label>
+                <input type="text" id="city" name="city" required>
+                
+                <label for="state">State:</label>
+                <input type="text" id="state" name="state" required>
+                
+                <label for="zipcode">Zip Code:</label>
+                <input type="text" id="zipcode" name="zipcode" required>
+            </fieldset>
+            
+            <fieldset>
+                <legend>Trash Can Information</legend>
+                <label for="number-of-cans">Number of Cans:</label>
+                <input type="number" id="number-of-cans" name="number-of-cans" required>
+                
+                <label for="location">Where They Are Kept:</label>
+                <input type="text" id="location" name="location" required>
+                
+                <label for="gate-code">Gate/Garage Code (if applicable):</label>
+                <input type="text" id="gate-code" name="gate-code">
+                
+                <label for="pets">Pets:</label>
+                <textarea id="pets" name="pets" rows="3"></textarea>
+            </fieldset>
+            
+            <div class="submit-wrapper">
+                <button type="submit">Register</button>
+            </div>
+        </form>
+    </main>
+</body>
+</html>

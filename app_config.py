@@ -1,0 +1,1 @@
+DATABASE_URI = 'sqlite:///can2curb.sqlite3'
