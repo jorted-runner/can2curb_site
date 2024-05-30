@@ -4,4 +4,9 @@
         <a href="{{ url_for('register')}}">Register</a>
         <a href="{{ url_for('login') }}">Login</a>
     </nav>
+    {% if get_flashed_messages %}
+        {% for message in get_flashed_messages() %}
+            <h4 class="flashed_message">{{ message | safe }}</h4>
+        {% endfor %}
+    {% endif %}
 </header>
