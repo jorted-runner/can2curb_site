@@ -198,8 +198,8 @@ def login():
         return render_template("login.html", current_user=current_user)
 
 
-@login_required
 @app.route('/manage')
+@login_required
 def manage():
     user = User.query.filter_by(id=current_user.id).first()
     return render_template('manage.html', user=user)
