@@ -1,6 +1,10 @@
 <header>
     {% if current_user.is_authenticated %}
-        <h1 class="poetsen-one-regular logo-header"><a href="{{ url_for('manage') }}">can2curb</a></h1>
+        {% if current_user.profile_type != 'client' %}
+            <h1 class="poetsen-one-regular logo-header"><a href="{{ url_for('admin') }}">can2curb</a></h1>
+        {% else %}
+            <h1 class="poetsen-one-regular logo-header"><a href="{{ url_for('manage') }}">can2curb</a></h1>
+        {% endif %}
     {% else %}
         <h1 class="poetsen-one-regular logo-header"><a href="{{ url_for('home') }}">can2curb</a></h1>
     {% endif %}

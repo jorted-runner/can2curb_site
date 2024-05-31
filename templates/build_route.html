@@ -9,12 +9,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poetsen+One&display=swap" rel="stylesheet">
     <script defer src="/static/scripts/admin_build.js"></script>
+    <script defer src="/static/scripts/main.js"></script>
 </head>
 <body>
     {% include 'header.html' %}
     
     <main>
-        <h1>Build Home</h1>
+        {% include 'admin_head.html' %}
         <div id="address_form_container">
             <form action="{{ url_for('build_route') }}" id="address_form">
                 <fieldset>
@@ -42,6 +43,7 @@
                     <th class="checkbox-column"><input type="checkbox" id="select_all"></th>
                     <th class="poetsen-one-regular table_column_head" id="house_num_head">House Number</th>
                     <th class="poetsen-one-regular table_column_head" id="street_head">Street Address</th>
+                    <th class="poetsen-one-regular table_column_head" id="trash_day">Trash Day</th>
                     <th class="poetsen-one-regular table_column_head" id="cans_head">Number of Cans</th>
                     <th class="poetsen-one-regular table_column_head" id="location_head">Can Location</th>
                     <th class="poetsen-one-regular table_column_head" id="code_head">Gate/Garage Code</th>
@@ -55,6 +57,7 @@
                     <td class="checkbox-column"><input type="checkbox" class="row-select" value="{{address.id}}"></td>
                     <td class="house_num">{{address.house_num}}</td>
                     <td class="street_address">{{address.street_address}}</td>
+                    <td class="trash_day">{{address.trash_day}}</td>
                     <td class="trash_nums">{{address.trash_can_data.num_cans}}</td>
                     <td class="location">{{address.trash_can_data.location}}</td>
                     <td class="gate_garage">{{address.trash_can_data.gate_garage_code}}</td>

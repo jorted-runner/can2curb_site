@@ -53,7 +53,16 @@
                 <input type="text" id="zipcode" name="zipcode" required>
 
                 <label for="trash_day">Trash Day:</label>
-                <input type="text" id="trash_day" name="trash_day" required>
+                <select name="trash_day" id="trash_day" required>
+                    <option value="" disabled selected>Select trash day</option>
+                    <option value="monday">Monday</option>
+                    <option value="tuesday">Tuesday</option>
+                    <option value="wednesday">Wednesday</option>
+                    <option value="thursday">Thursday</option>
+                    <option value="friday">Friday</option>
+                    <option value="saturday">Saturday</option>
+                    <option value="sunday">Sunday</option>
+                </select>
             </fieldset>
             
             <fieldset>

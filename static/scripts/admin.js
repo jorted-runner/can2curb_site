@@ -31,12 +31,4 @@ document.addEventListener("DOMContentLoaded", () => {
     // Sort by the first column in descending order by default
     const firstColumn = document.querySelector('.table_column_head');
     sortTable(firstColumn, false);  // false indicates descending order
-
-    document.getElementById('build_route').addEventListener('click', () => {
-        window.location.href = '/build-route'; // Replace with the actual URL for "Build Route"
-    });
-
-    document.getElementById('view_routes').addEventListener('click', () => {
-        window.location.href = '/view-routes'; // Replace with the actual URL for "View Routes"
-    });
 });

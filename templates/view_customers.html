@@ -20,21 +20,19 @@
         <table>
             <thead>
                 <tr>
-                    <th class="poetsen-one-regular table_column_head" id="house_num_head">Route Name</th>
-                    <th class="poetsen-one-regular table_column_head" id="house_num_head">Trash Day</th>
-                    <th class="poetsen-one-regular table_column_head" id="house_num_head">Number of Houses</th>
-                    <th class="poetsen-one-regular table_column_head" id="house_num_head">View Route</th>
+                    <th class="poetsen-one-regular table_column_head" id="house_num_head">Customer Name</th>
+                    <th class="poetsen-one-regular table_column_head" id="house_num_head">Number of Addresses</th>
+                    <th class="poetsen-one-regular table_column_head" id="house_num_head">View Customer</th>
                 </tr>
             </thead>
             <tbody>
-                {% for route in all_routes %}
+                {% for customer in customers %}
                 <tr>
-                    <td>{{route.name}}</td>
-                    <td>{{route.day}}</td>
-                    <td>{{route.addresses | length }}</td>
+                    <td>{{customer.fname}} {{customer.lname}}</td>
+                    <td>{{customer.addresses | length }}</td>
                     <td>
-                        <form action="{{ url_for('view_route', route_id=route.id) }}" method="get">
-                            <input type="submit" value="View Route">
+                        <form action="{{ url_for('view_customer', customer_id=customer.id) }}" method="get">
+                            <input type="submit" value="View Customer">
                         </form>
                     </td>
                 </tr>

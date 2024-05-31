@@ -49,6 +49,19 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     });
+        // Filter rows based on selected trash day
+    const trashDaySelect = document.getElementById('trash_day');
+    trashDaySelect.addEventListener('change', () => {
+        const selectedDay = trashDaySelect.value;
+        document.querySelectorAll('tbody tr').forEach(row => {
+            const trashDay = row.querySelector('.trash_day').textContent.toLowerCase();
+            if (trashDay === selectedDay || selectedDay === "") {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
 });
 
 document.getElementById('address_form').addEventListener('submit', function(event) {
@@ -84,4 +97,5 @@ document.getElementById('address_form').addEventListener('submit', function(even
         console.error('Error saving route:', error);
     });
     
-})
+});
+

@@ -56,8 +56,8 @@ class Address(db.Model):
 
 class Route_Addresses(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    route_id = db.Column('route_id', db.Integer, db.ForeignKey('route.id'), primary_key=True)
-    address_id = db.Column('address_id', db.Integer, db.ForeignKey('address.id'), primary_key=True)
+    route_id = db.Column('route_id', db.Integer, db.ForeignKey('route.id'))
+    address_id = db.Column('address_id', db.Integer, db.ForeignKey('address.id'))
 
 class Route(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -87,7 +87,7 @@ def load_user(user_id):
 def admin_only(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if current_user.profile_type != 'client' or current_user.email in app_config.ADMIN_EMAILS:
+        if current_user.profile_type == 'client':
             return abort(403)
         return f(*args, **kwargs)
     return decorated_function
@@ -185,7 +185,7 @@ def login():
         if user:
             if check_password_hash(user.password, password):
                 login_user(user)
-                if user.profile_type != 'employee' or user.email in app_config.ADMIN_EMAILS:
+                if user.profile_type != 'client' or user.email in app_config.ADMIN_EMAILS:
                     return redirect(url_for('admin'))
                 return redirect(url_for('manage'))
             else:
@@ -209,20 +209,21 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
-@admin_only
 @app.route('/admin')
-def admin():
-    addresses = Address.query.all()
-    return render_template('admin.html', addresses=addresses, current_user=current_user)
-
 @admin_only
+def admin():
+    title = 'Admin Home'
+    addresses = Address.query.all()
+    return render_template('admin.html', title=title, addresses=addresses, current_user=current_user)
+
 @app.route('/build-route', methods=['GET', 'POST'])
+@admin_only
 def build_route():
     if request.method == 'POST':
         try:
             name = request.form.get('route_name')
             day = request.form.get('trash_day')
-            selected_addresses_ids = request.form.getlist('selected_addresses[]')
+            selected_addresses_ids = request.form.getlist('selected_addresses')
             new_route = Route(name=name, day=day)
             db.session.add(new_route)
             db.session.commit()
@@ -237,14 +238,40 @@ def build_route():
             traceback.print_exc()
             return jsonify({'success': False, 'message': 'Issue saving route'})
     addresses = Address.query.all()
-    return render_template('build_route.html', addresses=addresses, current_user=current_user)
+    title = 'Build Route'
+    return render_template('build_route.html', title=title, addresses=addresses, current_user=current_user)
 
-@admin_only
 @app.route('/view-routes', methods=['GET'])
+@admin_only
 def view_routes():
-    all_routes = Route.query.options(joinedload(Route.addresses)).all()
-    return render_template('view_routes.html', route_addresses=all_routes)
+    all_routes = Route.query.all()
+    title = 'View Routes'
+    return render_template('view_routes.html', title=title, all_routes=all_routes)
 
+@app.route('/view_route/<int:route_id>')
+@admin_only
+def view_route(route_id):
+    route = Route.query.filter_by(id=route_id).first()
+    title = f'View {route.name} Route'
+    if route is None:
+        flash("Route not found")
+        return redirect(url_for('view_routes'))
+    route_addresses_id_data = Route_Addresses.query.filter_by(route_id=route_id).all()
+    address_ids = [ra.address_id for ra in route_addresses_id_data]
+    route_addresses = Address.query.filter(Address.id.in_(address_ids)).all()
+    return render_template('view_route.html', route=route, title=title, addresses=route_addresses)
+
+@app.route('/view_customers')
+@admin_only
+def view_customers():
+    customers = User.query.filter_by(profile_type='client').all()
+    title = 'View Customers'
+    return render_template('view_customers.html', title=title, customers=customers, current_user=current_user)
+
+@app.route('/view_customer/<customer_id>')
+@admin_only
+def view_customer(customer_id):
+    pass
 
 if __name__ == '__main__':
     app.run(debug=True)
