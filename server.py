@@ -113,6 +113,42 @@ def home():
             return redirect(url_for('manage'))
     return render_template('index.html')
 
+@app.route('/add_admin_account', methods=['POST', 'GET'])
+def add_admin_account():
+    if request.method == 'POST':
+        admin_code = request.form.get('admin_code')
+        if admin_code == os.environ.get('ADD_ADMIN_PASSWORD'):
+            first_name = VALIDATOR.clean_input(request.form.get('first-name'))
+            last_name = VALIDATOR.clean_input(request.form.get('last-name'))
+            email = VALIDATOR.clean_input(request.form.get('email'))
+            phone_num = VALIDATOR.clean_input(request.form.get('phone'))
+            password = request.form.get('password_conf')
+            new_user_password = generate_password_hash(password, method='pbkdf2:sha256', salt_length=8)
+            try:
+                new_user = User(
+                    fname=first_name, 
+                    lname=last_name,
+                    email=email,
+                    phone=phone_num,      
+                    password=new_user_password,
+                    profile_type='employee'
+                )
+                db.session.add(new_user)
+                
+                db.session.commit()
+                flash('Employee Account Created')
+                return redirect(url_for('login'))
+            except:
+                db.session.rollback()
+                traceback.print_exc()
+                flash('Issue adding Employee account')
+                return render_template('add_admin.html')
+        else:
+            flash('Incorrect Admin Code')
+            return render_template('add_admin.html')
+    return render_template('add_admin.html')
+
+
 @app.route('/register', methods=['POST', 'GET'])
 def register():
     if request.method == "POST":
