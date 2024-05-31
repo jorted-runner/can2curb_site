@@ -8,18 +8,41 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poetsen+One&display=swap" rel="stylesheet">
+    <script defer src="/static/scripts/admin.js"></script>
 </head>
 <body>
     {% include 'header.html' %}
     
     <main>
         <h1>Admin Home</h1>
-        {% for user in all_users %}
-            <p>{{user.fname}}</p>
-            {% for address in user.addresses %}
-                {{address.street_address}}
-            {% endfor %}
-        {% endfor %}
+        <button id="build_route">Build Route</button>
+        <button id="view_routes">View Routes</button>
+            <table>
+                <thead>
+                    <tr>
+                        <th class="poetsen-one-regular table_column_head" id="house_num_head">House Number</th>
+                        <th class="poetsen-one-regular table_column_head" id="street_head">Street Address</th>
+                        <th class="poetsen-one-regular table_column_head" id="cans_head">Number of Cans</th>
+                        <th class="poetsen-one-regular table_column_head" id="location_head">Can Location</th>
+                        <th class="poetsen-one-regular table_column_head" id="code_head">Gate/Garage Code</th>
+                        <th class="poetsen-one-regular table_column_head" id="pet_head">Pet Info</th>
+                        <th class="poetsen-one-regular table_column_head" id="note_head">Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for address in addresses %}
+                    <tr>
+                        <td class="house_num">{{address.house_num}}</td>
+                        <td class="street_address">{{address.street_address}}</td>
+                        <td class="trash_nums">{{address.trash_can_data.num_cans}}</td>
+                        <td class="location">{{address.trash_can_data.location}}</td>
+                        <td class="gate_garage">{{address.trash_can_data.gate_garage_code}}</td>
+                        <td class="pet_info">{{address.trash_can_data.pet_info}}</td>
+                        <td class="notes">{{address.trash_can_data.notes}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
     </main>
 </body>
 </html>

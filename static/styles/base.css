@@ -9,6 +9,10 @@ body {
     margin: 0;
     padding: 0;
 }
+main {
+    width: 90%;
+    margin: 0 auto;
+}
 
 /* Header Styling */
 header {
@@ -84,7 +88,7 @@ input, textarea {
 .submit-wrapper {
     text-align: center;
 }
-button[type="submit"] {
+button {
     background-color: #2B642D;
     color: white;
     padding: 10px 20px;
@@ -95,6 +99,33 @@ button[type="submit"] {
     display: inline-block;
     margin: 0 auto;
 }
-button[type="submit"]:hover {
+button:hover {
     background-color: #45a049;
+}
+/* table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+    margin: 1rem;
+}
+thead tr {
+    background-color: #2B642D;
+    color: white;
+    font-weight: bold;
+}
+tbody tr:nth-child(odd) {
+    background-color: white;
+}
+tbody tr:nth-child(even) {
+    background-color: rgb(199, 248, 199);
+}
+table td, table th {
+    padding: .25rem;
+}
+.sort-asc::after {
+    content: ' ▲';
+}
+.sort-desc::after {
+    content: ' ▼';
 }

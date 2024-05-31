@@ -94,6 +94,11 @@ def handle_exception(e):
 
 @app.route('/')
 def home():
+    if current_user.is_authenticated:
+        if current_user.profile_type != 'client' or current_user.email in app_config.ADMIN_EMAILS:
+            return redirect(url_for('admin'))
+        else:
+            return redirect(url_for('manage'))
     return render_template('index.html')
 
 @app.route('/register', methods=['POST', 'GET'])
@@ -195,8 +200,8 @@ def logout():
 @admin_only
 @app.route('/admin')
 def admin():
-    all_users = User.query.all()
-    return render_template('admin.html', all_users=all_users, current_user=current_user)
+    addresses = Address.query.all()
+    return render_template('admin.html', addresses=addresses, current_user=current_user)
 
 if __name__ == '__main__':
     app.run(debug=True)
