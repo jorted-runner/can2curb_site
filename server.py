@@ -271,7 +271,9 @@ def view_customers():
 @app.route('/view_customer/<customer_id>')
 @admin_only
 def view_customer(customer_id):
-    pass
+    customer = User.query.filter_by(id=customer_id).first()
+    title = f'View {customer.fname} {customer.lname}'
+    return render_template('view_customer.html', title=title, customer=customer, current_user=current_user)
 
 if __name__ == '__main__':
     app.run(debug=True)
