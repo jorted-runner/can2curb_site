@@ -88,7 +88,7 @@ document.getElementById('address_form').addEventListener('submit', function(even
     })
     .then(data => {
         if (data.success) {
-            window.location.href = '/admin';
+            window.location.href = '/view-routes';
         } else {
             throw new Error('Failed to save route');
         }

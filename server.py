@@ -278,15 +278,23 @@ def build_route():
     title = 'Build Route'
     return render_template('build_route.html', title=title, addresses=addresses, current_user=current_user)
 
+# Edit Route may also use it for the duplicate route option
 @app.route('/edit_route/<route_id>')
 @admin_only
 def edit_route(route_id):
     pass
 
-@app.route('/delete_route/<route_id>')
+@app.route('/delete_route/<route_id>', methods=['POST'])
 @admin_only
 def delete_route(route_id):
-    pass
+    route = Route.query.filter_by(id=route_id).first()
+    addresses = Route_Addresses.query.filter_by(route_id=route_id).all()
+    for address in addresses:
+        db.session.delete(address)
+    db.session.delete(route)
+    db.session.commit()
+    flash('Route Deleted Successfully')
+    return redirect(url_for('view_routes'))
 
 @app.route('/view-routes', methods=['GET'])
 @admin_only
