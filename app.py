@@ -54,6 +54,17 @@ class Address(db.Model):
     trash_can_data = db.relationship('Trash_Can_Data', backref='address', uselist=False, cascade="all, delete-orphan")
     route_id = db.Column(db.Integer, db.ForeignKey('route.id'), nullable=True)
 
+class Route_Addresses(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    route_id = db.Column('route_id', db.Integer, db.ForeignKey('route.id'), primary_key=True)
+    address_id = db.Column('address_id', db.Integer, db.ForeignKey('address.id'), primary_key=True)
+
+class Route(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(250), nullable=False)
+    day = db.Column(db.String(15), nullable=False)
+    addresses = db.relationship("Route_Addresses", backref='routes', cascade="all, delete-orphan")
+
 class Trash_Can_Data(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     num_cans = db.Column(db.Integer, nullable=False)
@@ -62,18 +73,6 @@ class Trash_Can_Data(db.Model):
     pet_info = db.Column(db.String(250), nullable=True)
     notes = db.Column(db.String(250), nullable=True)
     address_id = db.Column(db.Integer, db.ForeignKey('address.id'), unique=True, nullable=False)
-
-route_addresses = db.Table(
-    'route_addresses',
-    db.Column('route_id', db.Integer, db.ForeignKey('route.id'), primary_key=True),
-    db.Column('address_id', db.Integer, db.ForeignKey('address.id'), primary_key=True)
-)
-
-class Route(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(250), nullable=False)
-    day = db.Column(db.String(15), nullable=False)
-    addresses = db.relationship("Address", secondary=route_addresses, backref='route')
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -224,16 +223,13 @@ def build_route():
             name = request.form.get('route_name')
             day = request.form.get('trash_day')
             selected_addresses_ids = request.form.getlist('selected_addresses[]')
-            selected_addresses = Address.query.filter(Address.id.in_(selected_addresses_ids)).all()
-            if len(selected_addresses) != len(selected_addresses_ids):
-                return jsonify({'success': False, 'message': 'No addresses found'}), 404
             new_route = Route(name=name, day=day)
             db.session.add(new_route)
             db.session.commit()
-            for address in selected_addresses:
-                address.route_id = new_route.id
-            db.session.commit()
-
+            for address in selected_addresses_ids:
+                new_addy = Route_Addresses(route_id=new_route.id, address_id=int(address))
+                db.session.add(new_addy)
+                db.session.commit()
             flash('Route successfully saved', 'success')
             return jsonify({'success': True}), 200
         except:
