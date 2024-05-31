@@ -9,6 +9,7 @@ from sqlalchemy import or_
 from sqlalchemy.orm import joinedload
 import os
 import traceback
+import logging
 
 from dotenv import load_dotenv
 from functools import wraps
@@ -310,6 +311,68 @@ def view_customer(customer_id):
     customer = User.query.filter_by(id=customer_id).first()
     title = f'View {customer.fname} {customer.lname}'
     return render_template('view_customer.html', title=title, customer=customer, current_user=current_user)
+
+@app.route('/edit_address/<address_id>', methods=['POST', 'GET'])
+@login_required
+def edit_address(address_id):
+    title = 'Edit Address'
+    address = Address.query.filter_by(id=address_id).first()
+    trash_can = Trash_Can_Data.query.filter_by(address_id=address_id).first()
+    next_url = request.args.get('next')
+    print(next_url)
+    if request.method == 'POST':
+        try:
+            origin = request.form.get('origin')
+            house_num = VALIDATOR.clean_input(request.form.get('houseNum'))
+            street = VALIDATOR.clean_input(request.form.get('street'))
+            city = VALIDATOR.clean_input(request.form.get('city'))
+            state = VALIDATOR.clean_input(request.form.get('state'))
+            zipcode = VALIDATOR.clean_input(request.form.get('zipcode'))
+            trash_day = request.form.get('trash_day')
+            num_cans = VALIDATOR.clean_input(request.form.get('number-of-cans'))
+            location = VALIDATOR.clean_input(request.form.get('location'))
+            gate_code = VALIDATOR.clean_input(request.form.get('gate-code'))
+            pets = request.form.get('pets')
+            notes = request.form.get('notes')
+            address.house_num = house_num
+            address.street_address = street
+            address.city = city
+            address.state = state
+            address.zipcode = zipcode
+            if trash_day:
+                address.trash_day = trash_day
+            trash_can.num_cans = num_cans
+            trash_can.location = location
+            trash_can.gate_garage_code = gate_code
+            if pets:
+                trash_can.pet_info = VALIDATOR.clean_input(pets)
+            if notes:
+                trash_can.notes = VALIDATOR.clean_input(notes)
+            db.session.commit()
+            flash('Address Updated Successfully')
+            return redirect(origin) if origin else redirect(url_for('admin'))
+        except:
+            traceback.print_exc()
+            db.session.rollback()
+    
+    return render_template('edit_address.html', title=title, next=next_url, address=address, current_user=current_user)
+
+@app.route('/delete_address/<address_id>', methods=['POST'])
+@admin_only
+def delete_address(address_id):
+    address = Address.query.filter_by(id=address_id).first()
+    trash_can = Trash_Can_Data.query.filter_by(address_id=address_id).first()
+    
+    if address:
+        db.session.delete(address)
+    if trash_can:
+        db.session.delete(trash_can)
+        
+    db.session.commit()
+    flash('Address Removed Successfully')
+    
+    next_url = request.form.get('next')
+    return redirect(next_url) if next_url else redirect(url_for('admin'))
 
 if __name__ == '__main__':
     app.run(debug=True)

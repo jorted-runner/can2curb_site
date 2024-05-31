@@ -32,3 +32,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const firstColumn = document.querySelector('.table_column_head');
     sortTable(firstColumn, false);  // false indicates descending order
 });
+document.addEventListener("DOMContentLoaded", function() {
+    var nextInput = document.getElementById('next');
+    if (nextInput) {
+        nextInput.value = window.location.href;
+    }
+});
