@@ -104,10 +104,10 @@ button:hover {
 }
 /* table */
 table {
+    margin: 1rem;
     width: 100%;
     border-collapse: collapse;
     text-align: center;
-    margin: 1rem;
 }
 thead tr {
     background-color: #2B642D;
@@ -118,7 +118,7 @@ tbody tr:nth-child(odd) {
     background-color: white;
 }
 tbody tr:nth-child(even) {
-    background-color: rgb(199, 248, 199);
+    background-color: rgb(201, 248, 201);
 }
 table td, table th {
     padding: .25rem;
@@ -128,4 +128,11 @@ table td, table th {
 }
 .sort-desc::after {
     content: ' ▼';
+}
+.checkbox-column {
+    width: 5%;
+}
+
+.hidden {
+    display: none;
 }

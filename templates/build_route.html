@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Can2Curb</title>
+    <link href="/static/styles/base.css" type="text/css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poetsen+One&display=swap" rel="stylesheet">
+    <script defer src="/static/scripts/admin_build.js"></script>
+</head>
+<body>
+    {% include 'header.html' %}
+    
+    <main>
+        <h1>Build Home</h1>
+        <div id="address_form_container">
+            <form action="{{ url_for('build_route') }}" id="address_form">
+                <fieldset>
+                    <legend>Route Information</legend>
+                    <label for="route_name">Route Name</label>
+                    <input type="text" name="route_name" id="route_name" required>
+                    <label for="trash_day">Trash Day</label>
+                    <select name="trash_day" id="trash_day" required>
+                        <option value="" disabled selected>Select trash day</option>
+                        <option value="monday">Monday</option>
+                        <option value="tuesday">Tuesday</option>
+                        <option value="wednesday">Wednesday</option>
+                        <option value="thursday">Thursday</option>
+                        <option value="friday">Friday</option>
+                        <option value="saturday">Saturday</option>
+                        <option value="sunday">Sunday</option>
+                    </select>
+                </fieldset>
+                <button type="submit">Save Route</button>
+            </form>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th class="checkbox-column"><input type="checkbox" id="select_all"></th>
+                    <th class="poetsen-one-regular table_column_head" id="house_num_head">House Number</th>
+                    <th class="poetsen-one-regular table_column_head" id="street_head">Street Address</th>
+                    <th class="poetsen-one-regular table_column_head" id="cans_head">Number of Cans</th>
+                    <th class="poetsen-one-regular table_column_head" id="location_head">Can Location</th>
+                    <th class="poetsen-one-regular table_column_head" id="code_head">Gate/Garage Code</th>
+                    <th class="poetsen-one-regular table_column_head" id="pet_head">Pet Info</th>
+                    <th class="poetsen-one-regular table_column_head" id="note_head">Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for address in addresses %}
+                <tr>
+                    <td class="checkbox-column"><input type="checkbox" class="row-select" value="{{address.id}}"></td>
+                    <td class="house_num">{{address.house_num}}</td>
+                    <td class="street_address">{{address.street_address}}</td>
+                    <td class="trash_nums">{{address.trash_can_data.num_cans}}</td>
+                    <td class="location">{{address.trash_can_data.location}}</td>
+                    <td class="gate_garage">{{address.trash_can_data.gate_garage_code}}</td>
+                    <td class="pet_info">{{address.trash_can_data.pet_info}}</td>
+                    <td class="notes">{{address.trash_can_data.notes}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+    </main>
+</body>
+</html>

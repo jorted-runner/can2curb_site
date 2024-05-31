@@ -7,9 +7,8 @@ from flask_session import Session
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import or_
 from sqlalchemy.orm import joinedload
-
-import app_config
 import os
+import traceback
 
 from dotenv import load_dotenv
 from functools import wraps
@@ -17,6 +16,7 @@ from sqlalchemy import func
 from datetime import datetime
 from sqlalchemy import and_
 
+import app_config
 from retrieval import Retrieval
 from data_validation import Data_Validation
 
@@ -52,6 +52,7 @@ class Address(db.Model):
     trash_day = db.Column(db.String(15), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     trash_can_data = db.relationship('Trash_Can_Data', backref='address', uselist=False, cascade="all, delete-orphan")
+    route_id = db.Column(db.Integer, db.ForeignKey('route.id'), nullable=True)
 
 class Trash_Can_Data(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -61,6 +62,18 @@ class Trash_Can_Data(db.Model):
     pet_info = db.Column(db.String(250), nullable=True)
     notes = db.Column(db.String(250), nullable=True)
     address_id = db.Column(db.Integer, db.ForeignKey('address.id'), unique=True, nullable=False)
+
+route_addresses = db.Table(
+    'route_addresses',
+    db.Column('route_id', db.Integer, db.ForeignKey('route.id'), primary_key=True),
+    db.Column('address_id', db.Integer, db.ForeignKey('address.id'), primary_key=True)
+)
+
+class Route(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(250), nullable=False)
+    day = db.Column(db.String(15), nullable=False)
+    addresses = db.relationship("Address", secondary=route_addresses, backref='route')
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -202,6 +215,40 @@ def logout():
 def admin():
     addresses = Address.query.all()
     return render_template('admin.html', addresses=addresses, current_user=current_user)
+
+@admin_only
+@app.route('/build-route', methods=['GET', 'POST'])
+def build_route():
+    if request.method == 'POST':
+        try:
+            name = request.form.get('route_name')
+            day = request.form.get('trash_day')
+            selected_addresses_ids = request.form.getlist('selected_addresses[]')
+            selected_addresses = Address.query.filter(Address.id.in_(selected_addresses_ids)).all()
+            if len(selected_addresses) != len(selected_addresses_ids):
+                return jsonify({'success': False, 'message': 'No addresses found'}), 404
+            new_route = Route(name=name, day=day)
+            db.session.add(new_route)
+            db.session.commit()
+            for address in selected_addresses:
+                address.route_id = new_route.id
+            db.session.commit()
+
+            flash('Route successfully saved', 'success')
+            return jsonify({'success': True}), 200
+        except:
+            db.session.rollback()
+            traceback.print_exc()
+            return jsonify({'success': False, 'message': 'Issue saving route'})
+    addresses = Address.query.all()
+    return render_template('build_route.html', addresses=addresses, current_user=current_user)
+
+@admin_only
+@app.route('/view-routes', methods=['GET'])
+def view_routes():
+    all_routes = Route.query.options(joinedload(Route.addresses)).all()
+    return render_template('view_routes.html', route_addresses=all_routes)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

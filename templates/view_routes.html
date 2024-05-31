@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Can2Curb</title>
+    <link href="/static/styles/base.css" type="text/css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poetsen+One&display=swap" rel="stylesheet">
+    <script defer src="/static/scripts/admin.js"></script>
+</head>
+<body>
+    {% include 'header.html' %}
+    
+    <main>
+        <h1>Admin Home</h1>
+        <button id="build_route">Build Route</button>
+        <button id="view_routes">View Routes</button>
+        <ul>
+            {% for route in route_addresses %}
+            <li>
+                <h2>Route Name: {{ route.name }}</h2>
+                <p>Day: {{ route.day }}</p>
+                <h3>Associated Addresses:</h3>
+                <ul>
+                    {% for address in route.addresses %}
+                    <li>
+                        <p>House Number: {{ address.house_num }}</p>
+                        <p>Street Address: {{ address.street_address }}</p>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </li>
+            {% endfor %}
+        </ul>
+    </main>
+</body>
+</html>
