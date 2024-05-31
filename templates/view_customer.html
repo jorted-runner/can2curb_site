@@ -17,6 +17,11 @@
     
     <main>
         {% include 'admin_head.html' %}
+        <form class="form_add_address" action="{{url_for('add_address')}}" method="get">
+            <input type="hidden" value="{{customer.id}}" name="customer_id" id="customer_id">
+            <button type="submit">Add Address</button>
+        </form>
+        
         <table>
             <thead>
                 <tr>
@@ -50,7 +55,7 @@
                         </form>
                     </td>
                     <td>
-                        <form action="{{ url_for('delete_address', address_id=address.id) }}" method="POST">
+                        <form class="table_form" action="{{ url_for('delete_address', address_id=address.id) }}" method="POST">
                             <input type="hidden" name="next" id="next">
                             <input type="submit" value="🗑️">
                         </form>

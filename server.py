@@ -312,6 +312,49 @@ def view_customer(customer_id):
     title = f'View {customer.fname} {customer.lname}'
     return render_template('view_customer.html', title=title, customer=customer, current_user=current_user)
 
+@app.route('/add_address', methods=['POST', 'GET'])
+@login_required
+def add_address():
+    if request.method == 'POST':
+        user_id = request.form.get('customer_id')
+        house_num = VALIDATOR.clean_input(request.form.get('houseNum'))
+        street = VALIDATOR.clean_input(request.form.get('street'))
+        city = VALIDATOR.clean_input(request.form.get('city'))
+        state = VALIDATOR.clean_input(request.form.get('state'))
+        zipcode = VALIDATOR.clean_input(request.form.get('zipcode'))
+        trash_day = request.form.get('trash_day')
+        num_cans = VALIDATOR.clean_input(request.form.get('number-of-cans'))
+        location = VALIDATOR.clean_input(request.form.get('location'))
+        gate_code = VALIDATOR.clean_input(request.form.get('gate-code'))
+        pets = request.form.get('pets')
+        notes = request.form.get('notes')
+        new_address = Address(
+            house_num=house_num,
+            street_address=street,
+            city=city,
+            state=state,
+            zip_code=zipcode,
+            trash_day=trash_day,
+            user_id=user_id
+        )
+        db.session.add(new_address)
+        db.session.commit()
+
+        new_trash_can = Trash_Can_Data(
+            num_cans=num_cans, 
+            location=location, 
+            gate_garage_code=gate_code, 
+            pet_info=pets, 
+            notes=notes,
+            address_id=new_address.id
+        )
+        db.session.add(new_trash_can)
+        db.session.commit()
+        return redirect(url_for('view_customer', customer_id=user_id))
+    user_id = request.args.get('customer_id')
+    return render_template('add_address.html', title='Add Address', customer_id=user_id, current_user=current_user)
+
+
 @app.route('/edit_address/<address_id>', methods=['POST', 'GET'])
 @login_required
 def edit_address(address_id):
@@ -319,7 +362,6 @@ def edit_address(address_id):
     address = Address.query.filter_by(id=address_id).first()
     trash_can = Trash_Can_Data.query.filter_by(address_id=address_id).first()
     next_url = request.args.get('next')
-    print(next_url)
     if request.method == 'POST':
         try:
             origin = request.form.get('origin')

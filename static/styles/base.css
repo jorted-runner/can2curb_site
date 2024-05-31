@@ -153,6 +153,28 @@ table td, table th {
 .table_form button:hover {
     background-color: #45a049;
 }
+
+.form_add_address {
+    border: none;
+    margin: 0;
+    padding: 1rem 0 0 0;
+    width: 5rem;
+}
+
+.form_add_address button {
+    background-color: #2B642D;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 10px;
+    display: inline-block;
+    margin: 0 auto;
+}
+.form_add_address button:hover {
+    background-color: #45a049;
+}
 .hidden {
     display: none;
 }
