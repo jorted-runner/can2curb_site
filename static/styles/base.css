@@ -153,7 +153,10 @@ table td, table th {
 .table_form button:hover {
     background-color: #45a049;
 }
-
+.delete_edit {
+    width: 2rem;
+    margin: 0 auto;
+}
 .form_add_address {
     border: none;
     margin: 0;

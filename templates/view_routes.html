@@ -24,6 +24,9 @@
                     <th class="poetsen-one-regular table_column_head" id="house_num_head">Trash Day</th>
                     <th class="poetsen-one-regular table_column_head" id="house_num_head">Number of Houses</th>
                     <th class="poetsen-one-regular table_column_head" id="house_num_head">View Route</th>
+                    <th class="poetsen-one-regular table_column_head" id="note_head">Edit</th>
+                    <th class="poetsen-one-regular table_column_head" id="note_head">Delete</th>
+
                 </tr>
             </thead>
             <tbody>
@@ -33,8 +36,20 @@
                     <td>{{route.day}}</td>
                     <td>{{route.addresses | length }}</td>
                     <td>
-                        <form action="{{ url_for('view_route', route_id=route.id) }}" method="get">
+                        <form class="table_form" action="{{ url_for('view_route', route_id=route.id) }}" method="get">
                             <input type="submit" value="View Route">
+                        </form>
+                    </td>
+                    <td>
+                        <form class="table_form delete_edit" action="{{ url_for('edit_route', route_id=route.id) }}" method="get">
+                            <input type="hidden" name="next" id="next">
+                            <input type="submit" value="✏️">
+                        </form>
+                    </td>
+                    <td>
+                        <form class="table_form delete_edit" action="{{ url_for('delete_route', route_id=route.id) }}" method="POST">
+                            <input type="hidden" name="next" id="next">
+                            <input type="submit" value="🗑️">
                         </form>
                     </td>
                 </tr>

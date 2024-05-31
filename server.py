@@ -278,6 +278,16 @@ def build_route():
     title = 'Build Route'
     return render_template('build_route.html', title=title, addresses=addresses, current_user=current_user)
 
+@app.route('/edit_route/<route_id>')
+@admin_only
+def edit_route(route_id):
+    pass
+
+@app.route('/delete_route/<route_id>')
+@admin_only
+def delete_route(route_id):
+    pass
+
 @app.route('/view-routes', methods=['GET'])
 @admin_only
 def view_routes():
@@ -404,11 +414,14 @@ def edit_address(address_id):
 def delete_address(address_id):
     address = Address.query.filter_by(id=address_id).first()
     trash_can = Trash_Can_Data.query.filter_by(address_id=address_id).first()
-    
+    route_refs = Route_Addresses.query.filter_by(address_id=address_id).all()
     if address:
         db.session.delete(address)
     if trash_can:
         db.session.delete(trash_can)
+    if route_refs:
+        for route in route_refs:
+            db.session.delete(route)
         
     db.session.commit()
     flash('Address Removed Successfully')

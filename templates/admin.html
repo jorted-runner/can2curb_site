@@ -44,13 +44,13 @@
                         <td class="pet_info">{{address.trash_can_data.pet_info}}</td>
                         <td class="notes">{{address.trash_can_data.notes}}</td>
                         <td>
-                            <form class="table_form" action="{{ url_for('edit_address', address_id=address.id) }}" method="get">
+                            <form class="table_form delete_edit" action="{{ url_for('edit_address', address_id=address.id) }}" method="get">
                                 <input type="hidden" name="next" id="next">
                                 <input type="submit" value="✏️">
                             </form>
                         </td>
                         <td>
-                            <form action="{{ url_for('delete_address', address_id=address.id) }}" method="POST">
+                            <form class="table_form delete_edit" action="{{ url_for('delete_address', address_id=address.id) }}" method="POST">
                                 <input type="hidden" name="next" id="next">
                                 <input type="submit" value="🗑️">
                             </form>
