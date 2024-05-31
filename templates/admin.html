@@ -28,6 +28,8 @@
                         <th class="poetsen-one-regular table_column_head" id="code_head">Gate/Garage Code</th>
                         <th class="poetsen-one-regular table_column_head" id="pet_head">Pet Info</th>
                         <th class="poetsen-one-regular table_column_head" id="note_head">Notes</th>
+                        <th class="poetsen-one-regular table_column_head" id="note_head">Edit</th>
+                        <th class="poetsen-one-regular table_column_head" id="note_head">Delete</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -41,6 +43,12 @@
                         <td class="gate_garage">{{address.trash_can_data.gate_garage_code}}</td>
                         <td class="pet_info">{{address.trash_can_data.pet_info}}</td>
                         <td class="notes">{{address.trash_can_data.notes}}</td>
+                        <form action="{{ url_for('edit_address', address_id=address.id) }}" method="get">
+                            <input type="submit" value="✏️">
+                        </form>
+                        <form action="{{ url_for('delete_address', address_id=address.id) }}" method="get">
+                            <input type="submit" value="🗑️">
+                        </form>
                     </tr>
                     {% endfor %}
                 </tbody>
