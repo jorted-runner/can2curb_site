@@ -278,11 +278,37 @@ def build_route():
     title = 'Build Route'
     return render_template('build_route.html', title=title, addresses=addresses, current_user=current_user)
 
-# Edit Route may also use it for the duplicate route option
-@app.route('/edit_route/<route_id>')
+@app.route('/edit_route/<route_id>', methods=['POST', 'GET'])
 @admin_only
 def edit_route(route_id):
-    pass
+    if request.method == 'POST':
+        try:
+            # This process needs adjustment
+            route = Route.query.filter_by(id=route_id)
+            name = request.form.get('route_name')
+            day = request.form.get('trash_day')
+            selected_addresses_ids = request.form.getlist('selected_addresses')
+            new_route = Route(name=name, day=day)
+            db.session.add(new_route)
+            db.session.commit()
+            for address in selected_addresses_ids:
+                new_addy = Route_Addresses(route_id=new_route.id, address_id=int(address))
+                db.session.add(new_addy)
+                db.session.commit()
+            flash('Route successfully saved', 'success')
+            return jsonify({'success': True}), 200
+        except:
+            db.session.rollback()
+            traceback.print_exc()
+            return jsonify({'success': False, 'message': 'Issue saving route'})
+    route = Route.query.filter_by(id=route_id).first()
+    route_addresses_id_data = Route_Addresses.query.filter_by(route_id=route_id).all()
+    address_ids = [ra.address_id for ra in route_addresses_id_data]
+    route_addresses = Address.query.filter(Address.id.in_(address_ids)).all()
+    addresses = Address.query.filter(~Address.id.in_(address_ids)).all()
+    title = f'Edit Route: {route.name}'
+    return render_template('edit_route.html', title=title, route=route, route_addresses=route_addresses, addresses=addresses, current_user=current_user)
+
 
 @app.route('/delete_route/<route_id>', methods=['POST'])
 @admin_only
