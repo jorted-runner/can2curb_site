@@ -51,6 +51,7 @@ class Address(db.Model):
     state = db.Column(db.String(250), nullable=False)
     zip_code = db.Column(db.String(15), nullable=False)
     trash_day = db.Column(db.String(15), nullable=False)
+    in_route = db.Column(db.Boolean, nullable=False, default=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     trash_can_data = db.relationship('Trash_Can_Data', backref='address', uselist=False, cascade="all, delete-orphan")
     route_id = db.Column(db.Integer, db.ForeignKey('route.id'), nullable=True)
@@ -250,7 +251,7 @@ def logout():
 @admin_only
 def admin():
     title = 'Admin Home'
-    addresses = Address.query.all()
+    addresses = Address.query.filter_by(in_route=False).all()
     return render_template('admin.html', title=title, addresses=addresses, current_user=current_user)
 
 @app.route('/build-route', methods=['GET', 'POST'])
@@ -265,9 +266,11 @@ def build_route():
             db.session.add(new_route)
             db.session.commit()
             for address in selected_addresses_ids:
+                update = Address.query.filter_by(id=address).first()
+                update.in_route = True
                 new_addy = Route_Addresses(route_id=new_route.id, address_id=int(address))
                 db.session.add(new_addy)
-                db.session.commit()
+            db.session.commit()
             flash('Route successfully saved', 'success')
             return jsonify({'success': True}), 200
         except:
@@ -278,29 +281,18 @@ def build_route():
     title = 'Build Route'
     return render_template('build_route.html', title=title, addresses=addresses, current_user=current_user)
 
+# Added in_route to the database so this may need to be adjusted
 @app.route('/edit_route/<route_id>', methods=['POST', 'GET'])
 @admin_only
 def edit_route(route_id):
     if request.method == 'POST':
-        try:
-            # This process needs adjustment
-            route = Route.query.filter_by(id=route_id)
-            name = request.form.get('route_name')
-            day = request.form.get('trash_day')
-            selected_addresses_ids = request.form.getlist('selected_addresses')
-            new_route = Route(name=name, day=day)
-            db.session.add(new_route)
-            db.session.commit()
-            for address in selected_addresses_ids:
-                new_addy = Route_Addresses(route_id=new_route.id, address_id=int(address))
-                db.session.add(new_addy)
-                db.session.commit()
-            flash('Route successfully saved', 'success')
-            return jsonify({'success': True}), 200
-        except:
-            db.session.rollback()
-            traceback.print_exc()
-            return jsonify({'success': False, 'message': 'Issue saving route'})
+        # This Whole route will need to be adjusted
+        # Step 1: Fetch Route Data 
+        # Step 2: Fetch Form Data
+        # Step 3: Validate Data
+        # Step 4: Identify new addresses and Removed Addresses
+        # Step 5: Save changes to database
+        pass
     route = Route.query.filter_by(id=route_id).first()
     route_addresses_id_data = Route_Addresses.query.filter_by(route_id=route_id).all()
     address_ids = [ra.address_id for ra in route_addresses_id_data]
@@ -309,13 +301,14 @@ def edit_route(route_id):
     title = f'Edit Route: {route.name}'
     return render_template('edit_route.html', title=title, route=route, route_addresses=route_addresses, addresses=addresses, current_user=current_user)
 
-
 @app.route('/delete_route/<route_id>', methods=['POST'])
 @admin_only
 def delete_route(route_id):
     route = Route.query.filter_by(id=route_id).first()
     addresses = Route_Addresses.query.filter_by(route_id=route_id).all()
     for address in addresses:
+        existing = Address.query.filter_by(id=address.address_is).first()
+        existing.in_route = False
         db.session.delete(address)
     db.session.delete(route)
     db.session.commit()
