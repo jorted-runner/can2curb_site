@@ -1,4 +1,10 @@
+var EXISTING_IDS = [];
+
 document.addEventListener("DOMContentLoaded", () => {
+    var selectedCheckboxes = document.querySelectorAll('.row-select:checked');
+    selectedCheckboxes.forEach(function(checkbox) {
+        EXISTING_IDS.push(checkbox.value);
+    });
     const getCellValue = (tr, idx) => tr.children[idx].innerText || tr.children[idx].textContent;
 
     const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
@@ -75,6 +81,8 @@ document.getElementById('address_form').addEventListener('submit', function(even
     selectedValues.forEach(function(value) {
         formData.append('selected_addresses', value);
     });
+    console.log(selectedValues)
+    console.log(EXISTING_IDS)
     fetch(this.action, {
         method: 'POST',
         body: formData

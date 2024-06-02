@@ -285,15 +285,21 @@ def build_route():
 @app.route('/edit_route/<route_id>', methods=['POST', 'GET'])
 @admin_only
 def edit_route(route_id):
+    route = Route.query.filter_by(id=route_id).first()
     if request.method == 'POST':
         # This Whole route will need to be adjusted
         # Step 1: Fetch Route Data 
         # Step 2: Fetch Form Data
-        # Step 3: Validate Data
+        name = request.form.get('route_name')
+        if name != route.name and name != '':
+            route.name = VALIDATOR.clean_input(name)
+        day = request.form.get('trash_day')
+        if route.day != day and day != '':
+            route.day = day
+        selected_addresses_ids = request.form.getlist('selected_addresses')
         # Step 4: Identify new addresses and Removed Addresses
         # Step 5: Save changes to database
         pass
-    route = Route.query.filter_by(id=route_id).first()
     route_addresses_id_data = Route_Addresses.query.filter_by(route_id=route_id).all()
     address_ids = [ra.address_id for ra in route_addresses_id_data]
     route_addresses = Address.query.filter(Address.id.in_(address_ids)).all()
