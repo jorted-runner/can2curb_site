@@ -81,8 +81,9 @@ document.getElementById('address_form').addEventListener('submit', function(even
     selectedValues.forEach(function(value) {
         formData.append('selected_addresses', value);
     });
-    console.log(selectedValues)
-    console.log(EXISTING_IDS)
+    EXISTING_IDS.forEach(function(value) {
+        formData.append('existing_ids', value);
+    });
     fetch(this.action, {
         method: 'POST',
         body: formData
@@ -91,14 +92,14 @@ document.getElementById('address_form').addEventListener('submit', function(even
         if (response.ok) {
             return response.json();
         } else {
-            throw new Error('Failed to save route');
+            throw new Error('Failed to update route');
         }
     })
     .then(data => {
         if (data.success) {
             window.location.href = '/view-routes';
         } else {
-            throw new Error('Failed to save route');
+            throw new Error('Failed to update route');
         }
     })
     .catch(error => {

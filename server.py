@@ -285,27 +285,46 @@ def build_route():
 @app.route('/edit_route/<route_id>', methods=['POST', 'GET'])
 @admin_only
 def edit_route(route_id):
-    route = Route.query.filter_by(id=route_id).first()
     if request.method == 'POST':
-        # This Whole route will need to be adjusted
-        # Step 1: Fetch Route Data 
-        # Step 2: Fetch Form Data
-        name = request.form.get('route_name')
-        if name != route.name and name != '':
-            route.name = VALIDATOR.clean_input(name)
-        day = request.form.get('trash_day')
-        if route.day != day and day != '':
-            route.day = day
-        selected_addresses_ids = request.form.getlist('selected_addresses')
-        # Step 4: Identify new addresses and Removed Addresses
-        # Step 5: Save changes to database
-        pass
-    route_addresses_id_data = Route_Addresses.query.filter_by(route_id=route_id).all()
-    address_ids = [ra.address_id for ra in route_addresses_id_data]
-    route_addresses = Address.query.filter(Address.id.in_(address_ids)).all()
-    addresses = Address.query.filter(~Address.id.in_(address_ids)).all()
-    title = f'Edit Route: {route.name}'
-    return render_template('edit_route.html', title=title, route=route, route_addresses=route_addresses, addresses=addresses, current_user=current_user)
+        try:
+            route = Route.query.filter_by(id=route_id).first()
+            name = request.form.get('route_name')
+            day = request.form.get('trash_day')
+            ids_before_edit = request.form.getlist('existing_ids')
+            selected_addresses_ids = request.form.getlist('selected_addresses')
+
+            if name != route.name and name != '':
+                route.name = VALIDATOR.clean_input(name)
+            print(route.day, day)
+            if route.day != day and day is not None:
+                route.day = day
+
+            ids_to_remove = [id for id in ids_before_edit if id not in selected_addresses_ids]
+            existing_ids = [id for id in selected_addresses_ids if id in ids_before_edit]
+            new_ids = [id for id in selected_addresses_ids if id not in existing_ids and id not in ids_to_remove]
+            for id in ids_to_remove:
+                route_removed = Route_Addresses.query.filter_by(address_id=id, route_id=route_id).first()
+                existing = Address.query.filter_by(id=route_removed.address_id).first()
+                existing.in_route = False
+                db.session.delete(route_removed)
+            for id in new_ids:
+                new_route = Route_Addresses(address_id = id, route_id = route_id)
+                db.session.add(new_route)
+            db.session.commit()
+            flash('Route updated successfully', 'success')
+            return jsonify({'success': True}), 200
+        except:
+            db.session.rollback()
+            traceback.print_exc()
+            return jsonify({'success': False, 'message': 'Issue updating route'}), 500
+    else:
+        route = Route.query.filter_by(id=route_id).first()
+        route_addresses_id_data = Route_Addresses.query.filter_by(route_id=route_id).all()
+        address_ids = [ra.address_id for ra in route_addresses_id_data]
+        route_addresses = Address.query.filter(Address.id.in_(address_ids)).all()
+        addresses = Address.query.filter(~Address.id.in_(address_ids)).all()
+        title = f'Edit Route: {route.name}'
+        return render_template('edit_route.html', title=title, route=route, route_addresses=route_addresses, addresses=addresses, current_user=current_user)
 
 @app.route('/delete_route/<route_id>', methods=['POST'])
 @admin_only
@@ -313,7 +332,7 @@ def delete_route(route_id):
     route = Route.query.filter_by(id=route_id).first()
     addresses = Route_Addresses.query.filter_by(route_id=route_id).all()
     for address in addresses:
-        existing = Address.query.filter_by(id=address.address_is).first()
+        existing = Address.query.filter_by(id=address.address_id).first()
         existing.in_route = False
         db.session.delete(address)
     db.session.delete(route)
