@@ -28,8 +28,9 @@
                         <th class="poetsen-one-regular table_column_head" id="code_head">Gate/Garage Code</th>
                         <th class="poetsen-one-regular table_column_head" id="pet_head">Pet Info</th>
                         <th class="poetsen-one-regular table_column_head" id="note_head">Notes</th>
-                        <th class="poetsen-one-regular table_column_head" id="note_head">Edit</th>
-                        <th class="poetsen-one-regular table_column_head" id="note_head">Delete</th>
+                        <th class="poetsen-one-regular table_column_head" id="edit_address">Edit</th>
+                        <th class="poetsen-one-regular table_column_head" id="delete_address">Delete</th>
+                        <th class="poetsen-one-regular table_column_head" id="add_to_route">Add to Route</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -53,6 +54,11 @@
                             <form class="table_form delete_edit" action="{{ url_for('delete_address', address_id=address.id) }}" method="POST">
                                 <input type="hidden" name="next" id="next">
                                 <input type="submit" value="🗑️">
+                            </form>
+                        </td>
+                        <td>
+                            <form class="table_form delete_edit" action="{{ url_for('add_to_route', address_id=address.id) }}" method="POST">
+                                <input type="submit" value="+">
                             </form>
                         </td>
                         
