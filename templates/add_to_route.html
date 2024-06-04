@@ -3,21 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Can2Curb</title>
+    <link href="/static/styles/base.css" type="text/css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poetsen+One&display=swap" rel="stylesheet">
+    <script defer src="/static/scripts/admin_edit_route.js"></script>
+    <script defer src="/static/scripts/main.js"></script>
 </head>
 <body>
+    {% include 'header.html' %}
+    <main>
+        {% include 'admin_head.html' %}
     <form method="POST">
         <fieldset>
             <label for="route">Routes</label>
             <select name="route" id="route">
                 <option value="" disabled selected>Select a Route</option>
                 {% for route in all_routes %}
-                <option value="{{route.id}}">{{route.name}}</option>
+                <option value="{{route.id}}">{{route.name}} {{route.day}}</option>
                 {% endfor %}
             </select>
 
         </fieldset>
         <button type="submit">Save Route</button>
     </form>
+    </main>
 </body>
 </html>
