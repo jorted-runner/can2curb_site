@@ -49,6 +49,14 @@ class User(UserMixin, db.Model):
     addresses = db.relationship('Address', backref='user', cascade="all, delete-orphan")
     payment_history = db.relationship('PaymentHistory', backref='user', cascade="all, delete-orphan")
 
+    @property
+    def active_route_addresses_list(self):
+        return json.loads(self.active_route_addresses) if self.active_route_addresses else []
+
+    @active_route_addresses_list.setter
+    def active_route_addresses_list(self, value):
+        self.active_route_addresses = json.dumps(value)
+
 class Payment_History(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     day = db.Column(db.Integer, default=lambda: datetime.now().day)
@@ -111,7 +119,16 @@ def load_user(user_id):
 def admin_only(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if current_user.profile_type == 'client':
+        if current_user.profile_type != 'admin':
+            return abort(403)
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+def employee_only(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if current_user.profile_type != 'employee' or current_user.profile_type != 'admin':
             return abort(403)
         return f(*args, **kwargs)
     return decorated_function
@@ -137,11 +154,11 @@ def home():
             return redirect(url_for('manage'))
     return render_template('index.html')
 
-@app.route('/add_admin_account', methods=['POST', 'GET'])
-def add_admin_account():
+@app.route('/add_employee_account', methods=['POST', 'GET'])
+def add_employee_account():
     if request.method == 'POST':
         admin_code = request.form.get('admin_code')
-        if admin_code == os.environ.get('ADD_ADMIN_PASSWORD'):
+        if admin_code == os.environ.get('ADD_EMPLOYEE_PASSWORD'):
             first_name = VALIDATOR.clean_input(request.form.get('first-name'))
             last_name = VALIDATOR.clean_input(request.form.get('last-name'))
             email = VALIDATOR.clean_input(request.form.get('email'))
@@ -161,7 +178,7 @@ def add_admin_account():
                 
                 db.session.commit()
                 flash('Employee Account Created')
-                return redirect(url_for('login'))
+                return redirect(url_for('admin'))
             except:
                 db.session.rollback()
                 traceback.print_exc()
@@ -172,6 +189,40 @@ def add_admin_account():
             return render_template('add_admin.html')
     return render_template('add_admin.html')
 
+@app.route('/add_admin_account', methods=['POST', 'GET'])
+def add_employee_account():
+    if request.method == 'POST':
+        admin_code = request.form.get('admin_code')
+        if admin_code == os.environ.get('ADD_ADMIN_PASSWORD'):
+            first_name = VALIDATOR.clean_input(request.form.get('first-name'))
+            last_name = VALIDATOR.clean_input(request.form.get('last-name'))
+            email = VALIDATOR.clean_input(request.form.get('email'))
+            phone_num = VALIDATOR.clean_input(request.form.get('phone'))
+            password = request.form.get('password_conf')
+            new_user_password = generate_password_hash(password, method='pbkdf2:sha256', salt_length=8)
+            try:
+                new_user = User(
+                    fname=first_name, 
+                    lname=last_name,
+                    email=email,
+                    phone=phone_num,      
+                    password=new_user_password,
+                    profile_type='admin'
+                )
+                db.session.add(new_user)
+                
+                db.session.commit()
+                flash('Admin Account Created')
+                return redirect(url_for('admin'))
+            except:
+                db.session.rollback()
+                traceback.print_exc()
+                flash('Issue adding Admin account')
+                return render_template('add_admin.html')
+        else:
+            flash('Incorrect Admin Code')
+            return render_template('add_admin.html')
+    return render_template('add_admin.html')
 
 @app.route('/register', methods=['POST', 'GET'])
 def register():
@@ -326,10 +377,23 @@ def assign_route(route_id):
         route = Route.query.filter_by(id=route_id).first()
         employee_id = request.form.get('employee')
         employee = User.query.filter_by(id=employee_id).first()
+        employee.active_route_id = route_id
+        employee.active_route_addresses = json.dumps([address.id for address in route.addresses])
+        db.session.commit()
+        return redirect(url_for('view_routes'))
     else:
         route = Route.query.filter_by(id=route_id)
         employees = User.query.filter(User.profile_type != 'client').all()
         return render_template('assign_route.html', title='Assign Route', route=route, employees=employees, current_user=current_user)
+
+@app.route('/active_route', methods=['POST', 'GET'])
+@login_required
+@employee_only
+def active_route():
+    route = Route.query.filter_by(id=current_user.active_route_id).first()
+    address_ids = current_user.active_route_addresses_list
+    addresses = Address.query.filter(Address.id.in_(address_ids)).all()
+    return render_template('active_route.html', route=route, addresses=addresses)
 
 @app.route('/edit_route/<route_id>', methods=['POST', 'GET'])
 @admin_only
