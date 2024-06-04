@@ -9,7 +9,7 @@ from sqlalchemy import or_
 from sqlalchemy.orm import joinedload
 import os
 import traceback
-import logging
+import json
 
 from dotenv import load_dotenv
 from functools import wraps
@@ -44,8 +44,18 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(250), nullable=True)
     sign_up_date = db.Column(db.DateTime, default=datetime.now)
     profile_type = db.Column(db.String(100), nullable=False, default='client')
+    active_route_id = db.Column(db.Integer, nullable=True)
+    active_route_addresses = db.Column(db.Text, nullable=True)
     addresses = db.relationship('Address', backref='user', cascade="all, delete-orphan")
-    payment_history = db.relationship('Payment_History', backref='user', cascade="all, delete-orphan")
+    payment_history = db.relationship('PaymentHistory', backref='user', cascade="all, delete-orphan")
+
+    @property
+    def active_route_addresses_list(self):
+        return json.loads(self.active_route_addresses) if self.active_route_addresses else []
+
+    @active_route_addresses_list.setter
+    def active_route_addresses_list(self, value):
+        self.active_route_addresses = json.dumps(value)
 
 class Payment_History(db.Model):
     id = db.Column(db.Integer, primary_key=True)

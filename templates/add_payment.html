@@ -17,9 +17,9 @@
     <form method="POST" action="{{url_for('add_payment', user_id=user_id)}}">
         <fieldset>
             <label for="amount">Amount</label>
-            <input name="amount" id="amount" type="number">
+            <input name="amount" id="amount" type="number" required>
             <label for="month">Month</label>
-            <select name="month" id="month">
+            <select name="month" id="month" required>
                 <option value="" disabled selected>Select a Month</option>
                 <option value="january">January</option>
                 <option value="february">February</option>
@@ -35,10 +35,10 @@
                 <option value="december">December</option>
             </select>
             <label for="day">Day</label>
-            <input type="number" name="day" id="day">
+            <input type="number" name="day" id="day" required>
 
             <label for="year">Year</label>
-            <input type="number" name="year" id="year">
+            <input type="number" name="year" id="year" required>
         </fieldset>
         <button type="submit">Save Payment</button>
     </form>
