@@ -281,7 +281,22 @@ def build_route():
     title = 'Build Route'
     return render_template('build_route.html', title=title, addresses=addresses, current_user=current_user)
 
-# Added in_route to the database so this may need to be adjusted
+@app.route('/add_to_route/<address_id>', methods=['POST', 'GET'])
+@admin_only
+def add_to_route(address_id):
+    if request.method == 'POST':
+        route_id = request.form.get('route')
+        to_add = Route_Addresses(route_id=route_id, address_id=address_id)
+        address = Address.query.filter_by(id=address_id).first()
+        address.in_route = True
+        db.session.add(to_add)
+        db.session.commit()
+        return redirect(url_for('admin'))
+    else:
+        address = Address.query.filter_by(id=address_id).first()
+        all_routes = Route.query.all()
+        return render_template('add_to_route.html', address=address, all_routes=all_routes, current_user=current_user)
+
 @app.route('/edit_route/<route_id>', methods=['POST', 'GET'])
 @admin_only
 def edit_route(route_id):
