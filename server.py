@@ -49,14 +49,6 @@ class User(UserMixin, db.Model):
     addresses = db.relationship('Address', backref='user', cascade="all, delete-orphan")
     payment_history = db.relationship('PaymentHistory', backref='user', cascade="all, delete-orphan")
 
-    @property
-    def active_route_addresses_list(self):
-        return json.loads(self.active_route_addresses) if self.active_route_addresses else []
-
-    @active_route_addresses_list.setter
-    def active_route_addresses_list(self, value):
-        self.active_route_addresses = json.dumps(value)
-
 class Payment_History(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     day = db.Column(db.Integer, default=lambda: datetime.now().day)
@@ -326,6 +318,18 @@ def add_to_route(address_id):
         address = Address.query.filter_by(id=address_id).first()
         all_routes = Route.query.all()
         return render_template('add_to_route.html', address=address, all_routes=all_routes, current_user=current_user)
+
+@app.route('/assign_route/<route_id>', methods=['POST', 'GET'])
+@admin_only
+def assign_route(route_id):
+    if request.method == 'POST':
+        route = Route.query.filter_by(id=route_id).first()
+        employee_id = request.form.get('employee')
+        employee = User.query.filter_by(id=employee_id).first()
+    else:
+        route = Route.query.filter_by(id=route_id)
+        employees = User.query.filter(User.profile_type != 'client').all()
+        return render_template('assign_route.html', title='Assign Route', route=route, employees=employees, current_user=current_user)
 
 @app.route('/edit_route/<route_id>', methods=['POST', 'GET'])
 @admin_only

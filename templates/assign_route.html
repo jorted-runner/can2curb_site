@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Can2Curb</title>
+    <link href="/static/styles/base.css" type="text/css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poetsen+One&display=swap" rel="stylesheet">
+    <script defer src="/static/scripts/admin_edit_route.js"></script>
+    <script defer src="/static/scripts/main.js"></script>
+</head>
+<body>
+    {% include 'header.html' %}
+    <main>
+        {% include 'admin_head.html' %}
+        <table>
+            <thead>
+                <tr>
+                    <th class="poetsen-one-regular table_column_head" id="house_num_head">Route Name</th>
+                    <th class="poetsen-one-regular table_column_head" id="house_num_head">Trash Day</th>
+                    <th class="poetsen-one-regular table_column_head" id="house_num_head">Number of Houses</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{route.name}}</td>
+                    <td>{{route.day}}</td>
+                    <td>{{route.addresses | length }}</td>
+                </tr>
+            </tbody>
+        </table>
+    <form method="POST" action="{{url_for('assign_route', route_id=route.id)}}">
+        <fieldset>
+            <label for="employee">Employees</label>
+            <select name="employee" id="employee">
+                <option value="" disabled selected>Select an Employee</option>
+                {% for employee in employees %}
+                <option value="{{employee.id}}">{{employee.fname}} {{employee.lname}}</option>
+                {% endfor %}
+            </select>
+
+        </fieldset>
+        <button type="submit">Assign Route</button>
+    </form>
+    </main>
+</body>
+</html>
