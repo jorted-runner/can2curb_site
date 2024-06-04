@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Can2Curb</title>
+    <link href="/static/styles/base.css" type="text/css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poetsen+One&display=swap" rel="stylesheet">
+    <script defer src="/static/scripts/main.js"></script>
+    <script defer src="/static/scripts/mark_complete.js"></script>
+
+</head>
+<body>
+    {% include 'header.html' %}
+    
+    <main>
+        {% include 'admin_head.html' %}
+            <h1>{{route.name}}</h1>
+            <h3>{{route.day}}</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th class="poetsen-one-regular table_column_head" id="house_num_head">House Number</th>
+                        <th class="poetsen-one-regular table_column_head" id="street_head">Street Address</th>
+                        <th class="poetsen-one-regular table_column_head" id="house_num_head">Trash Day</th>
+                        <th class="poetsen-one-regular table_column_head" id="cans_head">Number of Cans</th>
+                        <th class="poetsen-one-regular table_column_head" id="location_head">Can Location</th>
+                        <th class="poetsen-one-regular table_column_head" id="code_head">Gate/Garage Code</th>
+                        <th class="poetsen-one-regular table_column_head" id="pet_head">Pet Info</th>
+                        <th class="poetsen-one-regular table_column_head" id="note_head">Notes</th>
+                        <th class="poetsen-one-regular table_column_head" id="complete">Complete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for address in addresses %}
+                    <tr>
+                        <td class="house_num">{{address.house_num}}</td>
+                        <td class="street_address">{{address.street_address}}</td>
+                        <td class="trash_day">{{address.trash_day}}</td>
+                        <td class="trash_nums">{{address.trash_can_data.num_cans}}</td>
+                        <td class="location">{{address.trash_can_data.location}}</td>
+                        <td class="gate_garage">{{address.trash_can_data.gate_garage_code}}</td>
+                        <td class="pet_info">{{address.trash_can_data.pet_info}}</td>
+                        <td class="notes">{{address.trash_can_data.notes}}</td>
+                        <td>
+                            <form class="table_form mark_complete" action="{{ url_for('mark_complete', address_id=address.id) }}" method="POST">
+                                <input type="submit" value="✅">
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+    </main>
+</body>
+</html>

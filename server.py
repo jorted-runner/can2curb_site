@@ -47,7 +47,7 @@ class User(UserMixin, db.Model):
     active_route_id = db.Column(db.Integer, nullable=True)
     active_route_addresses = db.Column(db.Text, nullable=True)
     addresses = db.relationship('Address', backref='user', cascade="all, delete-orphan")
-    payment_history = db.relationship('PaymentHistory', backref='user', cascade="all, delete-orphan")
+    payment_history = db.relationship('Payment_History', backref='user', cascade="all, delete-orphan")
 
     @property
     def active_route_addresses_list(self):
@@ -190,7 +190,7 @@ def add_employee_account():
     return render_template('add_admin.html')
 
 @app.route('/add_admin_account', methods=['POST', 'GET'])
-def add_employee_account():
+def add_admin_account():
     if request.method == 'POST':
         admin_code = request.form.get('admin_code')
         if admin_code == os.environ.get('ADD_ADMIN_PASSWORD'):
@@ -394,6 +394,25 @@ def active_route():
     address_ids = current_user.active_route_addresses_list
     addresses = Address.query.filter(Address.id.in_(address_ids)).all()
     return render_template('active_route.html', route=route, addresses=addresses)
+
+@app.route('/mark_complete/<address_id>', methods=['POST', 'GET'])
+@login_required
+@employee_only
+def mark_complete(address_id):
+    try:
+        route_id = current_user.active_route_id
+        address_ids = current_user.active_route_addresses_list
+        current_user.active_route_addresses_list = json.dumps([id for id in address_ids if id != address_id])
+        new_history = Service_History(address_id = address_id)
+        db.session.add(new_history)
+        db.session.commit()
+        flash('Address marked complete', 'success')
+        return jsonify({'success': True}), 200
+    except:
+        db.session.rollback()
+        traceback.print_exc()
+        return jsonify({'success': False, 'message': 'Issue marking complete'}), 500
+
 
 @app.route('/edit_route/<route_id>', methods=['POST', 'GET'])
 @admin_only
