@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Can2Curb</title>
+    <link href="/static/styles/base.css" type="text/css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poetsen+One&display=swap" rel="stylesheet">
+    <script defer src="/static/scripts/main.js"></script>
+</head>
+<body>
+    {% include 'header.html' %}
+    <main>
+        {% include 'admin_head.html' %}
+    <form method="POST" action="{{url_for('add_payment', user_id=user_id)}}">
+        <fieldset>
+            <label for="amount">Amount</label>
+            <input name="amount" id="amount" type="number">
+            <label for="month">Month</label>
+            <select name="month" id="month">
+                <option value="" disabled selected>Select a Month</option>
+                <option value="january">January</option>
+                <option value="february">February</option>
+                <option value="march">March</option>
+                <option value="april">April</option>
+                <option value="may">May</option>
+                <option value="june">June</option>
+                <option value="july">July</option>
+                <option value="august">August</option>
+                <option value="september">September</option>
+                <option value="october">October</option>
+                <option value="november">November</option>
+                <option value="december">December</option>
+            </select>
+            <label for="day">Day</label>
+            <input type="number" name="day" id="day">
+
+            <label for="year">Year</label>
+            <input type="number" name="year" id="year">
+        </fieldset>
+        <button type="submit">Save Payment</button>
+    </form>
+    </main>
+</body>
+</html>

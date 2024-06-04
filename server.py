@@ -32,6 +32,9 @@ app.config['SQLALCHEMY_DATABASE_URI'] = app_config.DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+def current_month_name():
+    return datetime.now().strftime('%B') 
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     fname = db.Column(db.String(100), nullable=False)
@@ -42,6 +45,22 @@ class User(UserMixin, db.Model):
     sign_up_date = db.Column(db.DateTime, default=datetime.now)
     profile_type = db.Column(db.String(100), nullable=False, default='client')
     addresses = db.relationship('Address', backref='user', cascade="all, delete-orphan")
+    payment_history = db.relationship('Payment_History', backref='user', cascade="all, delete-orphan")
+
+class Payment_History(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    day = db.Column(db.Integer, default=lambda: datetime.now().day)
+    month = db.Column(db.String(20), default=current_month_name)
+    year = db.Column(db.Integer, default=lambda: datetime.now().year)
+    amount = db.Column(db.Float, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+class Service_History(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    day = db.Column(db.Integer, default=lambda: datetime.now().day)
+    month = db.Column(db.String(20), default=current_month_name)
+    year = db.Column(db.Integer, default=lambda: datetime.now().year)
+    address_id = db.Column(db.Integer, db.ForeignKey('address.id'), nullable=False)
 
 class Address(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -55,6 +74,7 @@ class Address(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     trash_can_data = db.relationship('Trash_Can_Data', backref='address', uselist=False, cascade="all, delete-orphan")
     route_id = db.Column(db.Integer, db.ForeignKey('route.id'), nullable=True)
+    service_history = db.relationship('Service_History', backref='address', cascade="all, delete-orphan")
 
 class Route_Addresses(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -388,6 +408,21 @@ def view_customer(customer_id):
     customer = User.query.filter_by(id=customer_id).first()
     title = f'View {customer.fname} {customer.lname}'
     return render_template('view_customer.html', title=title, customer=customer, current_user=current_user)
+
+@app.route('/add_payment/<user_id>', methods=['POST', 'GET'])
+@admin_only
+def add_payment(user_id):
+    if request.method == 'POST':
+        month = request.form.get('month')
+        day = request.form.get('day')
+        year = request.form.get('year')
+        amount = request.form.get('amount')
+        new_payment = Payment_History(user_id=user_id, day=day, month=month, year=year, amount=amount)
+        db.session.add(new_payment)
+        db.session.commit()
+        return redirect(url_for('view_customer', customer_id=user_id))
+    else:
+        return render_template('add_payment.html', title='Add Payment', user_id=user_id, current_user=current_user)
 
 @app.route('/add_address', methods=['POST', 'GET'])
 @login_required

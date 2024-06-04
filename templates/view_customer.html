@@ -64,6 +64,54 @@
                 {% endfor %}
             </tbody>
         </table>
+
+        <h3>Payment History</h3>
+        <form class="form_add_address" action="{{url_for('add_payment', user_id=customer.id )}}" method="GET">
+            <button type="submit">Add Payment</button>
+        </form>
+        {% if  customer.payment_history %}
+            <table>
+                <thead>
+                    <tr>
+                        <th class="poetsen-one-regular table_column_head" id="payment_date">Payment Date</th>
+                        <th class="poetsen-one-regular table_column_head" id="payment_amount">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for history in customer.payment_history %}
+                    <tr>
+                        <td class="payment_date">{{history.month}} {{history.day}}, {{history.year}}</td>
+                        <td class="payment_amount">{{history.amount}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No payment history</p>
+        {% endif %}
+
+        <h3>Service History</h3>
+        {% for address in customer.addresses %}
+            <h4>{{address.street_address}}</h4>
+            {% if address.service_history %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="poetsen-one-regular table_column_head" id="service_date">Service Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for history in address.service_history %}
+                        <tr>
+                            <td class="payment_date">{{history.month}} {{history.day}}, {{history.year}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No Service History</p>
+            {% endif %}
+        {% endfor %}
     </main>
 </body>
 </html>
