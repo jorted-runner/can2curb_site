@@ -21,6 +21,8 @@ import app_config
 from retrieval import Retrieval
 from data_validation import Data_Validation
 from email_handler import EmailHandler
+from runtime_config import Config
+runtime = Config()
 
 load_dotenv()
 
@@ -692,5 +694,5 @@ def delete_address(address_id):
     next_url = request.form.get('next')
     return redirect(next_url) if next_url else redirect(url_for('admin'))
 
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    app.run(host=runtime.app_host,port=runtime.app_port,debug=runtime.debug_on)
