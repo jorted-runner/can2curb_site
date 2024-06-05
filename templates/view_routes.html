@@ -24,9 +24,11 @@
                     <th class="poetsen-one-regular table_column_head" id="house_num_head">Trash Day</th>
                     <th class="poetsen-one-regular table_column_head" id="house_num_head">Number of Houses</th>
                     <th class="poetsen-one-regular table_column_head" id="house_num_head">View Route</th>
+                    {% if current_user.profile_type == 'admin' %}
                     <th class="poetsen-one-regular table_column_head" id="assign_route">Assign to Employee</th>
                     <th class="poetsen-one-regular table_column_head" id="edit_route">Edit</th>
                     <th class="poetsen-one-regular table_column_head" id="delete_route">Delete</th>
+                    {% endif %}
                 </tr>
             </thead>
             <tbody>
@@ -40,6 +42,8 @@
                             <input type="submit" value="View Route">
                         </form>
                     </td>
+                    {% if current_user.profile_type == 'admin' %}
+
                     <td>
                         <form class="table_form assign_route" action="{{ url_for('assign_route', route_id=route.id) }}" method="GET">
                             <input type="submit" value="Assign">
@@ -57,6 +61,8 @@
                             <input type="submit" value="🗑️">
                         </form>
                     </td>
+                    {% endif %}
+
                 </tr>
                 {% endfor %}
             </tbody>

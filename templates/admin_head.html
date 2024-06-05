@@ -1,6 +1,8 @@
 <h1>{{title}}</h1>
 <button id="admin_home">Admin Home</button>
-<button id="build_route">Build Route</button>
+{% if current_user.profile_type == 'admin' %}
+    <button id="build_route">Build Route</button>
+{% endif %}
 <button id="view_routes">View Routes</button>
 <button id="active_route">View Active Route</button>
 <button id="view_customers">View Customers</button>

@@ -128,9 +128,10 @@ def admin_only(f):
 def employee_only(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if current_user.profile_type != 'employee' or current_user.profile_type != 'admin':
+        if current_user.profile_type == 'employee' or current_user.profile_type == 'admin':  
+            return f(*args, **kwargs)
+        else:
             return abort(403)
-        return f(*args, **kwargs)
     return decorated_function
 
 @app.errorhandler(404)
@@ -178,16 +179,16 @@ def add_employee_account():
                 
                 db.session.commit()
                 flash('Employee Account Created')
-                return redirect(url_for('admin'))
+                return redirect(url_for('login'))
             except:
                 db.session.rollback()
                 traceback.print_exc()
                 flash('Issue adding Employee account')
-                return render_template('add_admin.html')
+                redirect(url_for('add_employee_account'))
         else:
             flash('Incorrect Admin Code')
-            return render_template('add_admin.html')
-    return render_template('add_admin.html')
+            return redirect(url_for('add_employee_account'))
+    return render_template('add_emp.html')
 
 @app.route('/add_admin_account', methods=['POST', 'GET'])
 def add_admin_account():
@@ -296,7 +297,7 @@ def login():
         if user:
             if check_password_hash(user.password, password):
                 login_user(user)
-                if user.profile_type != 'client' or user.email in app_config.ADMIN_EMAILS:
+                if user.profile_type == 'admin' or user.profile_type == 'employee':
                     return redirect(url_for('admin'))
                 return redirect(url_for('manage'))
             else:
@@ -321,13 +322,15 @@ def logout():
     return redirect(url_for('home'))
 
 @app.route('/admin')
-@admin_only
+@login_required
+@employee_only
 def admin():
     title = 'Admin Home'
     addresses = Address.query.filter_by(in_route=False).all()
     return render_template('admin.html', title=title, addresses=addresses, current_user=current_user)
 
 @app.route('/build-route', methods=['GET', 'POST'])
+@login_required
 @admin_only
 def build_route():
     if request.method == 'POST':
@@ -355,7 +358,8 @@ def build_route():
     return render_template('build_route.html', title=title, addresses=addresses, current_user=current_user)
 
 @app.route('/add_to_route/<address_id>', methods=['POST', 'GET'])
-@admin_only
+@login_required
+@employee_only
 def add_to_route(address_id):
     if request.method == 'POST':
         route_id = request.form.get('route')
@@ -371,6 +375,7 @@ def add_to_route(address_id):
         return render_template('add_to_route.html', address=address, all_routes=all_routes, current_user=current_user)
 
 @app.route('/assign_route/<route_id>', methods=['POST', 'GET'])
+@login_required
 @admin_only
 def assign_route(route_id):
     if request.method == 'POST':
@@ -388,7 +393,7 @@ def assign_route(route_id):
 
 @app.route('/active_route', methods=['POST', 'GET'])
 @login_required
-@admin_only
+@employee_only
 def active_route():
     route = Route.query.filter_by(id=current_user.active_route_id).first()
     address_ids = current_user.active_route_addresses_list
@@ -397,7 +402,7 @@ def active_route():
 
 @app.route('/mark_complete/<address_id>', methods=['POST', 'GET'])
 @login_required
-@admin_only
+@employee_only
 def mark_complete(address_id):
     try:
         print("Initial active_route_addresses:", current_user.active_route_addresses)
@@ -423,6 +428,7 @@ def mark_complete(address_id):
 
 
 @app.route('/edit_route/<route_id>', methods=['POST', 'GET'])
+@login_required
 @admin_only
 def edit_route(route_id):
     if request.method == 'POST':
@@ -468,6 +474,7 @@ def edit_route(route_id):
         return render_template('edit_route.html', title=title, route=route, route_addresses=route_addresses, addresses=addresses, current_user=current_user)
 
 @app.route('/delete_route/<route_id>', methods=['POST'])
+@login_required
 @admin_only
 def delete_route(route_id):
     route = Route.query.filter_by(id=route_id).first()
@@ -482,14 +489,16 @@ def delete_route(route_id):
     return redirect(url_for('view_routes'))
 
 @app.route('/view-routes', methods=['GET'])
-@admin_only
+@login_required
+@employee_only
 def view_routes():
     all_routes = Route.query.all()
     title = 'View Routes'
     return render_template('view_routes.html', title=title, all_routes=all_routes)
 
 @app.route('/view_route/<int:route_id>')
-@admin_only
+@login_required
+@employee_only
 def view_route(route_id):
     route = Route.query.filter_by(id=route_id).first()
     title = f'View {route.name} Route'
@@ -502,21 +511,24 @@ def view_route(route_id):
     return render_template('view_route.html', route=route, title=title, addresses=route_addresses)
 
 @app.route('/view_customers')
-@admin_only
+@login_required
+@employee_only
 def view_customers():
     customers = User.query.filter_by(profile_type='client').all()
     title = 'View Customers'
     return render_template('view_customers.html', title=title, customers=customers, current_user=current_user)
 
 @app.route('/view_customer/<customer_id>')
-@admin_only
+@login_required
+@employee_only
 def view_customer(customer_id):
     customer = User.query.filter_by(id=customer_id).first()
     title = f'View {customer.fname} {customer.lname}'
     return render_template('view_customer.html', title=title, customer=customer, current_user=current_user)
 
 @app.route('/add_payment/<user_id>', methods=['POST', 'GET'])
-@admin_only
+@login_required
+@employee_only
 def add_payment(user_id):
     if request.method == 'POST':
         month = request.form.get('month')
@@ -618,6 +630,7 @@ def edit_address(address_id):
     return render_template('edit_address.html', title=title, next=next_url, address=address, current_user=current_user)
 
 @app.route('/delete_address/<address_id>', methods=['POST'])
+@login_required
 @admin_only
 def delete_address(address_id):
     address = Address.query.filter_by(id=address_id).first()

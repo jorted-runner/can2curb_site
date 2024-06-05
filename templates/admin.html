@@ -29,7 +29,9 @@
                         <th class="poetsen-one-regular table_column_head" id="pet_head">Pet Info</th>
                         <th class="poetsen-one-regular table_column_head" id="note_head">Notes</th>
                         <th class="poetsen-one-regular table_column_head" id="edit_address">Edit</th>
-                        <th class="poetsen-one-regular table_column_head" id="delete_address">Delete</th>
+                        {% if current_user.profile_type == 'admin' %}
+                            <th class="poetsen-one-regular table_column_head" id="delete_address">Delete</th>
+                        {% endif %}
                         <th class="poetsen-one-regular table_column_head" id="add_to_route">Add to Route</th>
                     </tr>
                 </thead>
@@ -50,12 +52,14 @@
                                 <input type="submit" value="✏️">
                             </form>
                         </td>
+                        {% if current_user.profile_type == 'admin' %}
                         <td>
                             <form class="table_form delete_edit" action="{{ url_for('delete_address', address_id=address.id) }}" method="POST">
                                 <input type="hidden" name="next" id="next">
                                 <input type="submit" value="🗑️">
                             </form>
                         </td>
+                        {% endif %}
                         <td>
                             <form class="table_form delete_edit" action="{{ url_for('add_to_route', address_id=address.id) }}" method="GET">
                                 <input type="submit" value="+">
