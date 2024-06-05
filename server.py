@@ -20,10 +20,13 @@ from sqlalchemy import and_
 import app_config
 from retrieval import Retrieval
 from data_validation import Data_Validation
+from email_handler import EmailHandler
 
 load_dotenv()
+
 RETRIEVER = Retrieval()
 VALIDATOR = Data_Validation()
+EMAILER = EmailHandler()
 
 app = Flask(__name__)
 app.config.from_object(app_config)
@@ -149,7 +152,7 @@ def handle_exception(e):
 @app.route('/')
 def home():
     if current_user.is_authenticated:
-        if current_user.profile_type != 'client' or current_user.email in app_config.ADMIN_EMAILS:
+        if current_user.profile_type == 'admin' or current_user.profile_type == 'employee':
             return redirect(url_for('admin'))
         else:
             return redirect(url_for('manage'))
@@ -285,6 +288,45 @@ def register():
         db.session.commit()
 
         login_user(new_user)
+        body = f'''
+        <h3>Welcome {first_name} {last_name}!</h3>
+        <p>Thank you for registering with can2curb. Here are the details you provided:</p>
+        <ul>
+            <li><strong>Email:</strong> {email}</li>
+            <li><strong>Phone Number:</strong> {phone_num}</li>
+            <li><strong>Address:</strong> {house_num} {street_address}, {city}, {state}, {zipcode}</li>
+            <li><strong>Trash Day:</strong> {trash_day}</li>
+            <li><strong>Number of Cans:</strong> {num_cans}</li>
+            <li><strong>Location:</strong> {location}</li>
+            <li><strong>Gate/Garage Code:</strong> {gate_code}</li>
+            <li><strong>Pet Information:</strong> {pet_info}</li>
+            <li><strong>Notes:</strong> {notes}</li>
+        </ul>
+        <p>If any of this information is incorrect or needs to be changed, please reply to this email to let us know.</p>
+        <p>Thank you!</p>
+        <p>Jake Ellis<br>CEO/Founder Can2Curb</p>
+        '''
+        EMAILER.send_email(email, 'Account Information Confirmation', body=body)
+        internal_body = f'''
+        <h3>New Client Registration</h3>
+        <p>A new client has registered with the following details:</p>
+        <ul>
+            <li><strong>First Name:</strong> {first_name}</li>
+            <li><strong>Last Name:</strong> {last_name}</li>
+            <li><strong>Email:</strong> {email}</li>
+            <li><strong>Phone Number:</strong> {phone_num}</li>
+            <li><strong>Address:</strong> {house_num} {street_address}, {city}, {state}, {zipcode}</li>
+            <li><strong>Trash Day:</strong> {trash_day}</li>
+            <li><strong>Number of Cans:</strong> {num_cans}</li>
+            <li><strong>Location:</strong> {location}</li>
+            <li><strong>Gate/Garage Code:</strong> {gate_code}</li>
+            <li><strong>Pet Information:</strong> {pet_info}</li>
+            <li><strong>Notes:</strong> {notes}</li>
+        </ul>
+        '''
+        
+        # Sending email to the internal team
+        EMAILER.send_email('can2curbUT@gmail.com', 'NEW CLIENT', body=internal_body)
         return redirect(url_for('manage'))
     return render_template('register.html')
 
