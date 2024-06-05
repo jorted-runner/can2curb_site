@@ -13,3 +13,7 @@ document.getElementById('view_routes').addEventListener('click', () => {
 document.getElementById('view_customers').addEventListener('click', () => {
     window.location.href = '/view_customers';
 });
+
+document.getElementById('active_route').addEventListener('click', () => {
+    window.location.href = '/active_route';
+});

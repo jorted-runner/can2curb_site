@@ -64,7 +64,7 @@
                 {% endfor %}
             </tbody>
         </table>
-
+<hr>
         <h3>Payment History</h3>
         <form class="form_add_address" action="{{url_for('add_payment', user_id=customer.id )}}" method="GET">
             <button type="submit">Add Payment</button>
@@ -89,7 +89,7 @@
         {% else %}
             <p>No payment history</p>
         {% endif %}
-
+<hr>
         <h3>Service History</h3>
         {% for address in customer.addresses %}
             <h4>{{address.street_address}}</h4>
@@ -111,6 +111,7 @@
             {% else %}
                 <p>No Service History</p>
             {% endif %}
+            <hr>
         {% endfor %}
     </main>
 </body>

@@ -213,7 +213,7 @@ def add_admin_account():
                 
                 db.session.commit()
                 flash('Admin Account Created')
-                return redirect(url_for('admin'))
+                return redirect(url_for('login'))
             except:
                 db.session.rollback()
                 traceback.print_exc()
@@ -382,36 +382,44 @@ def assign_route(route_id):
         db.session.commit()
         return redirect(url_for('view_routes'))
     else:
-        route = Route.query.filter_by(id=route_id)
+        route = Route.query.filter_by(id=route_id).first()
         employees = User.query.filter(User.profile_type != 'client').all()
         return render_template('assign_route.html', title='Assign Route', route=route, employees=employees, current_user=current_user)
 
 @app.route('/active_route', methods=['POST', 'GET'])
 @login_required
-@employee_only
+@admin_only
 def active_route():
     route = Route.query.filter_by(id=current_user.active_route_id).first()
     address_ids = current_user.active_route_addresses_list
     addresses = Address.query.filter(Address.id.in_(address_ids)).all()
-    return render_template('active_route.html', route=route, addresses=addresses)
+    return render_template('active_route.html', title='Active Route', route=route, addresses=addresses)
 
 @app.route('/mark_complete/<address_id>', methods=['POST', 'GET'])
 @login_required
-@employee_only
+@admin_only
 def mark_complete(address_id):
     try:
-        route_id = current_user.active_route_id
-        address_ids = current_user.active_route_addresses_list
-        current_user.active_route_addresses_list = json.dumps([id for id in address_ids if id != address_id])
-        new_history = Service_History(address_id = address_id)
+        print("Initial active_route_addresses:", current_user.active_route_addresses)
+        if current_user.active_route_addresses:
+            existing_address_ids = json.loads(current_user.active_route_addresses)
+        else:
+            existing_address_ids = []
+
+        existing_address_ids = [int(id) for id in existing_address_ids]
+
+        updated_address_ids = [id for id in existing_address_ids if int(id) != int(address_id)]
+        current_user.active_route_addresses = json.dumps(updated_address_ids)
+        new_history = Service_History(address_id=address_id)
         db.session.add(new_history)
         db.session.commit()
+
         flash('Address marked complete', 'success')
         return jsonify({'success': True}), 200
-    except:
+    except Exception as e:
         db.session.rollback()
         traceback.print_exc()
-        return jsonify({'success': False, 'message': 'Issue marking complete'}), 500
+        return jsonify({'success': False, 'message': 'Issue marking complete', 'error': str(e)}), 500
 
 
 @app.route('/edit_route/<route_id>', methods=['POST', 'GET'])
@@ -427,7 +435,6 @@ def edit_route(route_id):
 
             if name != route.name and name != '':
                 route.name = VALIDATOR.clean_input(name)
-            print(route.day, day)
             if route.day != day and day is not None:
                 route.day = day
 
@@ -441,6 +448,8 @@ def edit_route(route_id):
                 db.session.delete(route_removed)
             for id in new_ids:
                 new_route = Route_Addresses(address_id = id, route_id = route_id)
+                existing = Address.query.filter_by(id=id).first()
+                existing.in_route = True
                 db.session.add(new_route)
             db.session.commit()
             flash('Route updated successfully', 'success')
