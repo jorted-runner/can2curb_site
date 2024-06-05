@@ -1,4 +1,5 @@
 .env
+flaskapp.wsgi
 instance/
 flask_session/
 __pycache__/
