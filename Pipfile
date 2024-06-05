@@ -10,9 +10,10 @@ flask = "*"
 flask_sqlalchemy = "*"
 flask_login = "*"
 flask_bootstrap = "*"
-python-dotenv = "*"
-requests = "*"
-bleach = "*"
 flask_session = "*"
+werkzeug = "*"
+sqlalchemy = "*"
+python-dotenv = "*"
+bleach = "*"
 
 [requires]
